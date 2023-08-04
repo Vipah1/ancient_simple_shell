@@ -1,0 +1,76 @@
+#include "shell.h"
+/**
+* path_exist - this function checks if command exist in path
+* @cmd: the command to be checked
+* Return: Boolean value
+*/
+bool path_exist(const char *cmd)
+{
+
+char *path = getenv("PATH");
+char *path_cpy;
+char *token;
+char path_cmd[MAX_ARGS];
+if (path == NULL)
+{
+exit(EXIT_FAILURE);
+}
+path_cpy = strdup(path);
+if (path_cpy == NULL)
+{
+exit(EXIT_FAILURE);
+}
+token = strtok(path_cpy, ":");
+while (token != NULL)
+{
+char path_cmd[MAX_ARGS];
+size_t path_len = strlen(token);
+if (path_len + strlen(cmd) + 2 <= MAX_ARGS)
+{
+strcpy(path_cmd, token);
+strcat(path_cmd, "/");
+strcat(path_cmd, cmd);
+if (access(path_cmd, F_OK) == 0)
+{
+free(path_cpy);
+return (true);
+}
+}
+token = strtok(NULL, ":");
+}
+free(path_cpy);
+return (false);
+}
+/**
+* find_exec - this function finds the executable in path
+* @cmd: The command to find
+* Return: returns the command
+*/
+
+char *find_exec(const char *cmd)
+{
+char *path_env = getenv("PATH");
+char *paths = strdup(path_env);
+char *token;
+char *exec = NULL;
+const char delimiters[] = ":";
+if (paths == NULL)
+{
+perror("Memory allocation error");
+exit(EXIT_FAILURE);
+}
+
+token = strtok(paths, delimiters);
+while (token != NULL)
+{
+if (path_exist(cmd))
+{
+exec = strdup(cmd);
+break;
+}
+token = strtok(NULL, delimiters);
+}
+
+free(paths);
+return (exec);
+}
